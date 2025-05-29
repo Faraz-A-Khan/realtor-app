@@ -3,7 +3,6 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcryptjs';
 import { UserType } from 'generated/prisma';
 import * as jwt from 'jsonwebtoken';
-import { ConfigService } from '@nestjs/config';
 interface signupParams {
   name: string;
   phone: string;
@@ -18,8 +17,7 @@ interface signinParams {
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prismaService: PrismaService,
-    private readonly configService: ConfigService
+    private readonly prismaService: PrismaService
   ) { }
   async signup({ name, phone, email, password }: signupParams) {
     const userExists = await this.prismaService.user.findUnique({
@@ -67,7 +65,7 @@ export class AuthService {
   }
 
   private generateJWT(name: string, id: number): string {
-    const secret = this.configService.get<string>('JWT_SECRET');
+    const secret = process.env.JWT_SECRET;
     if (!secret) {
       throw new Error('JWT_SECRET is not defined in environment variables.');
     }
@@ -79,7 +77,7 @@ export class AuthService {
     );
   }
   generateProductKey(email: string, UserType: UserType) {
-    const prodKey = this.configService.get<string>('PRODUCT_KEY_SECRET');
+    const prodKey = process.env.PRODUCT_KEY_SECRET;
     const string = `${email}-${UserType}-${prodKey}`;
     return bcrypt.hash(string, 10);
   }
