@@ -19,10 +19,10 @@ export class AuthService {
   constructor(
     private readonly prismaService: PrismaService
   ) { }
-  async signup({ name, phone, email, password }: signupParams) {
+  async signup({ name, phone, email, password }: signupParams, userType: UserType) {
     const userExists = await this.prismaService.user.findUnique({
       where: {
-        email: email
+        email
       }
     });
     if (userExists) {
@@ -39,7 +39,7 @@ export class AuthService {
         name,
         phone,
         password: hashedPassword,
-        user_type: UserType.BUYER,
+        user_type: userType,
       }
     });
 
