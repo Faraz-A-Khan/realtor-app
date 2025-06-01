@@ -30,7 +30,6 @@ export class AuthController {
         throw new UnauthorizedException()
       }
     }
-
     return this.authService.signup(body, userType);
   }
   @Post('/signin')
