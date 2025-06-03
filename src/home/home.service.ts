@@ -11,10 +11,21 @@ interface GetHomeParams {
   };
   propertyType?: PropertyType;
 }
+
+interface CreateHomeParams {
+  address: string;
+  city: string;
+  price: number;
+  propertyType: PropertyType;
+  numberOfBedrooms: number;
+  numberOfBathrooms: number;
+  landSize: number;
+  images: { url: string }[]
+}
 @Injectable()
 export class HomeService {
   constructor(private readonly prismaService: PrismaService) { }
-  
+
   async getHomes(filters: GetHomeParams): Promise<HomeResponseDto[]> {
     const homes = await this.prismaService.home.findMany({
       select: {
@@ -37,7 +48,7 @@ export class HomeService {
       where: filters
     });
 
-    if(!homes.length) {
+    if (!homes.length) {
       throw new NotFoundException('No homes found with the provided filters');
     }
     return homes.map(home => {
@@ -71,6 +82,43 @@ export class HomeService {
     if (!home) {
       throw new NotFoundException(`Home with ID ${id} not found`);
     }
+    return new HomeResponseDto(home);
+  }
+
+  async createHome({ address, city, price, propertyType, numberOfBathrooms, numberOfBedrooms, landSize, images }: CreateHomeParams): Promise<HomeResponseDto> {
+    const home = await this.prismaService.home.create({
+      data: {
+        address,
+        city,
+        price,
+        propertyType,
+        number_of_bedrooms: numberOfBedrooms,
+        number_of_bathrooms: numberOfBathrooms,
+        land_size: landSize,
+        realtor_id: 4
+      },
+      select: {
+        id: true,
+        address: true,
+        city: true,
+        price: true,
+        propertyType: true,
+        number_of_bedrooms: true,
+        number_of_bathrooms: true,
+        listed_date: true,
+        land_size: true,
+      }
+    });
+
+    const homeImages = images.map(image => {
+      return {
+        url: image.url,
+        home_id: home.id
+      };
+    });
+    await this.prismaService.image.createMany({
+      data: homeImages
+    });
     return new HomeResponseDto(home);
   }
 }
