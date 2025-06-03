@@ -1,26 +1,36 @@
-import { Controller, Delete, Get, Post, Put } from '@nestjs/common';
+import { Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query } from '@nestjs/common';
+import { HomeService } from './home.service';
+import { HomeResponseDto } from './dto/home.dto';
+import { PropertyType } from 'generated/prisma';
 
 @Controller('home')
 export class HomeController {
+  constructor(private readonly homeService: HomeService) { }
   @Get()
-  getHomes() {
-    return {
-      message: 'Welcome to the Home Page',
-      status: 'success',
-    };
+  async getHomes(
+    @Query('city') city?: string,
+    @Query('minPrice') minPrice?: string,
+    @Query('maxPrice') maxPrice?: string,
+    @Query('propertyType') propertyType?: PropertyType
+  ): Promise<HomeResponseDto[]> {
+
+    const price = minPrice || maxPrice ? {
+      ...(minPrice && { gte: parseFloat(minPrice) }),
+      ...(maxPrice && { lte: parseFloat(maxPrice) }),
+    } : undefined;
+
+    const filters = {
+      ...(city && { city }),
+      ...(price && { price }),
+      ...(propertyType && { propertyType }),
+    }
+
+    return await this.homeService.getHomes(filters);
   }
 
   @Get(':id')
-  getHome() {
-    return {
-      message: 'Home details',
-      status: 'success',
-      data: {
-        id: 1,
-        name: 'Sample Home',
-        description: 'This is a sample home description.',
-      },
-    };
+  getHome(@Param('id', ParseIntPipe) id: number) {
+    return this.homeService.getHomeById(id);
   }
   @Post()
   createHome() {
