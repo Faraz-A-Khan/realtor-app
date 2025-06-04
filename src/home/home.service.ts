@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { HomeResponseDto } from './dto/home.dto';
 import { PropertyType } from 'generated/prisma';
-
 interface GetHomeParams {
   city?: string;
   price?: {
@@ -11,7 +10,6 @@ interface GetHomeParams {
   };
   propertyType?: PropertyType;
 }
-
 interface CreateHomeParams {
   address: string;
   city: string;
@@ -21,6 +19,15 @@ interface CreateHomeParams {
   numberOfBathrooms: number;
   landSize: number;
   images: { url: string }[]
+}
+interface UpdateHomeParams {
+  address?: string;
+  city?: string;
+  price?: number;
+  propertyType?: PropertyType;
+  numberOfBedrooms?: number;
+  numberOfBathrooms?: number;
+  landSize?: number;
 }
 @Injectable()
 export class HomeService {
@@ -95,7 +102,7 @@ export class HomeService {
         number_of_bedrooms: numberOfBedrooms,
         number_of_bathrooms: numberOfBathrooms,
         land_size: landSize,
-        realtor_id: 4
+        realtor_id: 20
       },
       select: {
         id: true,
@@ -120,5 +127,46 @@ export class HomeService {
       data: homeImages
     });
     return new HomeResponseDto(home);
+  }
+
+  async updateHomeById(id: number, { address, city, price, propertyType, numberOfBathrooms, numberOfBedrooms, landSize }: UpdateHomeParams): Promise<HomeResponseDto> {
+
+    const existingHome = await this.prismaService.home.findUnique({
+      where: { id }
+    });
+    if (!existingHome) {
+      throw new NotFoundException(`Home with ID ${id} not found`);
+    }
+    const home = await this.prismaService.home.update({
+      where: { id },
+      data: {
+        address,
+        city,
+        price,
+        propertyType,
+        number_of_bedrooms: numberOfBedrooms,
+        number_of_bathrooms: numberOfBathrooms,
+        land_size: landSize,
+      }
+    });
+
+    return new HomeResponseDto(home);
+  }
+
+  async deleteHomeById(id: number): Promise<{ message: string; status: string, data: HomeResponseDto }> {
+    const existingHome = await this.prismaService.home.findUnique({
+      where: { id }
+    });
+    if (!existingHome) {
+      throw new NotFoundException(`Home with ID ${id} not found`);
+    }
+    await this.prismaService.home.delete({
+      where: { id }
+    });
+    return {
+      message: `Home with ID: ${id} deleted successfully`,
+      status: 'success',
+      data: new HomeResponseDto(existingHome)
+    };
   }
 }

@@ -1,6 +1,6 @@
 import { PropertyType } from "generated/prisma";
 import { Exclude, Expose, Type } from "class-transformer";
-import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsPositive, IsString, ValidateNested } from "class-validator";
+import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, ValidateNested } from "class-validator";
 
 export class HomeResponseDto {
   id: number;
@@ -67,7 +67,6 @@ class Image {
 }
 
 export class CreateHomeDto {
-
   @IsString()
   @IsNotEmpty()
   address: string;
@@ -104,4 +103,41 @@ export class CreateHomeDto {
   constructor(partial: Partial<CreateHomeDto>) {
     Object.assign(this, partial);
   }
+}
+
+export class UpdateHomeDto {
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  address?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  numberOfBedrooms?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  numberOfBathrooms?: number;
+
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  city?: string;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  price?: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  landSize?: number;
+
+  @IsOptional()
+  @IsEnum(PropertyType)
+  @IsNotEmpty()
+  propertyType?: PropertyType;
 }
