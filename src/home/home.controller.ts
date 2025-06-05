@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, ForbiddenException, Get, Param, ParseIntPipe, Post, Put, Query, UnauthorizedException } from '@nestjs/common';
 import { HomeService } from './home.service';
 import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from './dto/home.dto';
 import { PropertyType } from 'generated/prisma';
@@ -40,16 +40,29 @@ export class HomeController {
     return this.homeService.createHome(body, user.id);
   }
   @Put(':id')
-  updateHome(
+  async updateHome(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: UpdateHomeDto
+    @Body() body: UpdateHomeDto,
+    @User() user: UserDetails
   ) {
+
+    const realtor = await this.homeService.getRealtorByHomeId(id);
+
+    if (realtor.id !== user.id) {
+      throw new UnauthorizedException("You do not have permission to update this resource");
+    }
     return this.homeService.updateHomeById(id, body);
   }
   @Delete(':id')
-  deleteHome(
-    @Param('id', ParseIntPipe) id: number
+  async deleteHome(
+    @Param('id', ParseIntPipe) id: number,
+    @User() user: UserDetails
   ) {
+    const realtor = await this.homeService.getRealtorByHomeId(id);
+
+    if (realtor.id !== user.id) {
+      throw new UnauthorizedException("You do not have permission to update this resource");
+    }
     return this.homeService.deleteHomeById(id);
   }
 }
