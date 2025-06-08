@@ -1,8 +1,9 @@
 import { Body, Controller, Delete, ForbiddenException, Get, Param, ParseIntPipe, Post, Put, Query, UnauthorizedException } from '@nestjs/common';
 import { HomeService } from './home.service';
 import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from './dto/home.dto';
-import { PropertyType } from 'generated/prisma';
+import { PropertyType, UserType } from 'generated/prisma';
 import { User, UserDetails } from 'src/user/decorators/user.decorator';
+import { Roles } from 'src/decorators/roles.decorator';
 @Controller('home')
 export class HomeController {
   constructor(private readonly homeService: HomeService) { }
@@ -32,6 +33,8 @@ export class HomeController {
   getHome(@Param('id', ParseIntPipe) id: number) {
     return this.homeService.getHomeById(id);
   }
+
+  @Roles(UserType.REALTOR, UserType.ADMIN)
   @Post()
   createHome(
     @Body() body: CreateHomeDto,
@@ -39,6 +42,8 @@ export class HomeController {
   ) {
     return this.homeService.createHome(body, user.id);
   }
+
+  @Roles(UserType.REALTOR, UserType.ADMIN)
   @Put(':id')
   async updateHome(
     @Param('id', ParseIntPipe) id: number,
@@ -53,6 +58,8 @@ export class HomeController {
     }
     return this.homeService.updateHomeById(id, body);
   }
+
+  @Roles(UserType.REALTOR, UserType.ADMIN)
   @Delete(':id')
   async deleteHome(
     @Param('id', ParseIntPipe) id: number,
