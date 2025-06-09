@@ -40,5 +40,5 @@ export class GenerateProductKeyDto {
 
   @IsEnum(UserType)
   @IsString()
-  userType: UserType; // Assuming userType is a string, adjust as necessary
+  userType: UserType;
 }
