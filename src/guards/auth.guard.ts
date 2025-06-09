@@ -1,5 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
+import { UserType } from "generated/prisma";
 import * as jwt from "jsonwebtoken";
 import { PrismaService } from "src/prisma/prisma.service";
 
@@ -17,7 +18,7 @@ export class AuthGuard implements CanActivate {
     private readonly prismaService: PrismaService
   ) { }
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const roles = this.reflector.getAllAndOverride<string[]>('roles', [context.getHandler(), context.getClass()]);
+    const roles = this.reflector.getAllAndOverride<UserType[]>('roles', [context.getHandler(), context.getClass()]);
 
     if (roles?.length) {
       const request = context.switchToHttp().getRequest();
@@ -29,7 +30,7 @@ export class AuthGuard implements CanActivate {
           where: {
             id: payload.id
           }
-        })
+        });
         if (!user) return false;
         if (roles.includes(user.user_type)) return true;
         return false;
