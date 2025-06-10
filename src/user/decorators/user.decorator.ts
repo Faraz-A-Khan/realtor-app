@@ -1,4 +1,4 @@
-import { createParamDecorator, ExecutionContext } from "@nestjs/common";
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 export interface UserDetails {
   name: string;
@@ -10,7 +10,7 @@ export interface UserDetails {
 export const User = createParamDecorator((data, context: ExecutionContext) => {
   const user = context.switchToHttp().getRequest().user;
   if (!user) {
-    throw new Error("User not found in request");
+    throw new Error('User not found in request');
   }
   return user;
 });

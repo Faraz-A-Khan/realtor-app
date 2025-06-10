@@ -1,6 +1,15 @@
-import { PropertyType } from "generated/prisma";
-import { Exclude, Expose, Type } from "class-transformer";
-import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, ValidateNested } from "class-validator";
+import { PropertyType } from 'generated/prisma';
+import { Exclude, Expose, Type } from 'class-transformer';
+import {
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 
 export class HomeResponseDto {
   id: number;
@@ -9,7 +18,7 @@ export class HomeResponseDto {
   @Exclude()
   number_of_bedrooms: number;
 
-  @Expose({ name: "numberOfBedrooms" })
+  @Expose({ name: 'numberOfBedrooms' })
   numberOfBedrooms() {
     return this.number_of_bedrooms;
   }
@@ -17,7 +26,7 @@ export class HomeResponseDto {
   @Exclude()
   number_of_bathrooms: number;
 
-  @Expose({ name: "numberOfBathrooms" })
+  @Expose({ name: 'numberOfBathrooms' })
   numberOfBathrooms() {
     return this.number_of_bathrooms;
   }
@@ -27,7 +36,7 @@ export class HomeResponseDto {
   @Exclude()
   listed_date: Date;
 
-  @Expose({ name: "listedDate" })
+  @Expose({ name: 'listedDate' })
   listedDate() {
     return this.listed_date;
   }
@@ -37,7 +46,7 @@ export class HomeResponseDto {
   @Exclude()
   land_size: number;
 
-  @Expose({ name: "landSize" })
+  @Expose({ name: 'landSize' })
   landSize() {
     return this.land_size;
   }
@@ -145,5 +154,5 @@ export class UpdateHomeDto {
 export class InquireDto {
   @IsString()
   @IsNotEmpty()
-  message: string
+  message: string;
 }

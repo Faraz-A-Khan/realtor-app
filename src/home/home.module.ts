@@ -7,9 +7,12 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 @Module({
   imports: [PrismaModule],
   controllers: [HomeController],
-  providers: [HomeService, {
-    provide: APP_INTERCEPTOR,
-    useClass: ClassSerializerInterceptor
-  }]
+  providers: [
+    HomeService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor,
+    },
+  ],
 })
 export class HomeModule {}
