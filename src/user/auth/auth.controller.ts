@@ -1,15 +1,21 @@
-import { Controller, Post, Body, Param, ParseEnumPipe, UnauthorizedException, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Param,
+  ParseEnumPipe,
+  UnauthorizedException,
+  Get,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { SignupDto, SigninDto, GenerateProductKeyDto } from '../dto/auth.dto';
 import { UserType } from 'generated/prisma';
 import * as bcrypt from 'bcryptjs';
 import { User, UserDetails } from '../decorators/user.decorator';
 
-
 @Controller('auth')
 export class AuthController {
-
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Post('/signup')
   async signupDefault(@Body() body: SignupDto) {
@@ -19,38 +25,35 @@ export class AuthController {
   @Post('/signup/:userType')
   async signup(
     @Body() body: SignupDto,
-    @Param('userType', new ParseEnumPipe(UserType)) userType: UserType
+    @Param('userType', new ParseEnumPipe(UserType)) userType: UserType,
   ) {
     if (userType !== UserType.BUYER) {
       if (!body.productKey) {
-        throw new UnauthorizedException()
+        throw new UnauthorizedException();
       }
       const validProductKey = `${body.email}-${userType}-${process.env.PRODUCT_KEY_SECRET}`;
-      const isValidProductKey = await bcrypt.compare(validProductKey, body.productKey);
+      const isValidProductKey = await bcrypt.compare(
+        validProductKey,
+        body.productKey,
+      );
       if (!isValidProductKey) {
-        throw new UnauthorizedException()
+        throw new UnauthorizedException();
       }
     }
     return this.authService.signup(body, userType);
   }
   @Post('/signin')
-  signin(
-    @Body() body: SigninDto
-  ) {
+  signin(@Body() body: SigninDto) {
     return this.authService.signin(body);
   }
 
   @Post('/key')
-  generateProductKey(
-    @Body() { email, userType }: GenerateProductKeyDto
-  ) {
+  generateProductKey(@Body() { email, userType }: GenerateProductKeyDto) {
     return this.authService.generateProductKey(email, userType);
   }
 
   @Get('/me')
-  me(
-    @User() user: UserDetails
-  ) {
+  me(@User() user: UserDetails) {
     return user;
   }
 }

@@ -11,13 +11,16 @@ import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 @Module({
   imports: [UserModule, PrismaModule, HomeModule],
   controllers: [AppController],
-  providers: [AppService, {
-    provide: APP_INTERCEPTOR,
-    useClass: UserInterceptor
-  },
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: UserInterceptor,
+    },
     {
       provide: APP_GUARD,
-      useClass: AuthGuard
-    }],
+      useClass: AuthGuard,
+    },
+  ],
 })
-export class AppModule { }
+export class AppModule {}

@@ -1,30 +1,49 @@
-import { Body, Controller, Delete, ForbiddenException, Get, Param, ParseIntPipe, Post, Put, Query, UnauthorizedException } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  ForbiddenException,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Query,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { HomeService } from './home.service';
-import { CreateHomeDto, HomeResponseDto, InquireDto, UpdateHomeDto } from './dto/home.dto';
+import {
+  CreateHomeDto,
+  HomeResponseDto,
+  InquireDto,
+  UpdateHomeDto,
+} from './dto/home.dto';
 import { PropertyType, UserType } from 'generated/prisma';
 import { User, UserDetails } from 'src/user/decorators/user.decorator';
 import { Roles } from 'src/decorators/roles.decorator';
 @Controller('home')
 export class HomeController {
-  constructor(private readonly homeService: HomeService) { }
+  constructor(private readonly homeService: HomeService) {}
   @Get()
   async getHomes(
     @Query('city') city?: string,
     @Query('minPrice') minPrice?: string,
     @Query('maxPrice') maxPrice?: string,
-    @Query('propertyType') propertyType?: PropertyType
+    @Query('propertyType') propertyType?: PropertyType,
   ): Promise<HomeResponseDto[]> {
-
-    const price = minPrice || maxPrice ? {
-      ...(minPrice && { gte: parseFloat(minPrice) }),
-      ...(maxPrice && { lte: parseFloat(maxPrice) }),
-    } : undefined;
+    const price =
+      minPrice || maxPrice
+        ? {
+            ...(minPrice && { gte: parseFloat(minPrice) }),
+            ...(maxPrice && { lte: parseFloat(maxPrice) }),
+          }
+        : undefined;
 
     const filters = {
       ...(city && { city }),
       ...(price && { price }),
       ...(propertyType && { propertyType }),
-    }
+    };
 
     return await this.homeService.getHomes(filters);
   }
@@ -36,10 +55,7 @@ export class HomeController {
 
   @Roles(UserType.REALTOR)
   @Post()
-  createHome(
-    @Body() body: CreateHomeDto,
-    @User() user: UserDetails
-  ) {
+  createHome(@Body() body: CreateHomeDto, @User() user: UserDetails) {
     return this.homeService.createHome(body, user.id);
   }
 
@@ -48,13 +64,14 @@ export class HomeController {
   async updateHome(
     @Param('id', ParseIntPipe) id: number,
     @Body() body: UpdateHomeDto,
-    @User() user: UserDetails
+    @User() user: UserDetails,
   ) {
-
     const realtor = await this.homeService.getRealtorByHomeId(id);
 
     if (realtor.id !== user.id) {
-      throw new UnauthorizedException("You do not have permission to update this resource");
+      throw new UnauthorizedException(
+        'You do not have permission to update this resource',
+      );
     }
     return this.homeService.updateHomeById(id, body);
   }
@@ -63,12 +80,14 @@ export class HomeController {
   @Delete(':id')
   async deleteHome(
     @Param('id', ParseIntPipe) id: number,
-    @User() user: UserDetails
+    @User() user: UserDetails,
   ) {
     const realtor = await this.homeService.getRealtorByHomeId(id);
 
     if (realtor.id !== user.id) {
-      throw new UnauthorizedException("You do not have permission to update this resource");
+      throw new UnauthorizedException(
+        'You do not have permission to update this resource',
+      );
     }
     return this.homeService.deleteHomeById(id);
   }
@@ -78,20 +97,22 @@ export class HomeController {
   inquire(
     @Param('id', ParseIntPipe) homeId: number,
     @User() user: UserDetails,
-    @Body() { message }: InquireDto
+    @Body() { message }: InquireDto,
   ) {
-    return this.homeService.inquire(user, homeId, message)
+    return this.homeService.inquire(user, homeId, message);
   }
 
   @Roles(UserType.REALTOR)
   @Get(':id/messages')
   async gethomeMessages(
-    @Param('id', ParseIntPipe) id: number, 
-    @User() user: UserDetails
+    @Param('id', ParseIntPipe) id: number,
+    @User() user: UserDetails,
   ) {
     const realtor = await this.homeService.getRealtorByHomeId(id);
     if (realtor.id !== user.id) {
-      throw new UnauthorizedException("You do not have permission to view these messages");
+      throw new UnauthorizedException(
+        'You do not have permission to view these messages',
+      );
     }
     return this.homeService.getMessagesByHome(id);
   }

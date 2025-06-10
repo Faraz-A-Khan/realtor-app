@@ -16,14 +16,15 @@ interface signinParams {
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly prismaService: PrismaService
-  ) { }
-  async signup({ name, phone, email, password }: signupParams, userType: UserType) {
+  constructor(private readonly prismaService: PrismaService) {}
+  async signup(
+    { name, phone, email, password }: signupParams,
+    userType: UserType,
+  ) {
     const userExists = await this.prismaService.user.findUnique({
       where: {
-        email
-      }
+        email,
+      },
     });
     if (userExists) {
       throw new ConflictException('User with this email already exists');
@@ -40,7 +41,7 @@ export class AuthService {
         phone,
         password: hashedPassword,
         user_type: userType,
-      }
+      },
     });
 
     return this.generateJWT(user.name, user.id);
@@ -49,8 +50,8 @@ export class AuthService {
   async signin({ email, password }: signinParams) {
     const user = await this.prismaService.user.findUnique({
       where: {
-        email: email
-      }
+        email: email,
+      },
     });
     if (!user) {
       throw new HttpException('User with this email does not exist', 400);
@@ -70,11 +71,7 @@ export class AuthService {
       throw new Error('JWT_SECRET is not defined in environment variables.');
     }
 
-    return jwt.sign(
-      { name: name, id: id },
-      secret,
-      { expiresIn: 3600000 }
-    );
+    return jwt.sign({ name: name, id: id }, secret, { expiresIn: 3600000 });
   }
   generateProductKey(email: string, UserType: UserType) {
     const prodKey = process.env.PRODUCT_KEY_SECRET;
